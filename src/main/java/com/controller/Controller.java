@@ -34,10 +34,10 @@ public class Controller {
 	{
 		return service.insertResource(resources);
 	}
-	
+	@CrossOrigin()
 	@PostMapping("/getAllClientResources")
 	public Map<String,Object> getAllClients(@RequestBody Client client ){
-		return service.getAllClients(client);
+		return service.getClientresources(client);
 	}
 	
 	@PutMapping("/updateClient")

@@ -3,6 +3,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,17 +26,16 @@ public class Service {
 
 		int result = 0;
 		int id = client.getId();
-		String name = client.getClientname();
+		String clientname = client.getClientname();
 		String category = client.getCategory();
-		String location = client.getLocation();
 		String email = client.getEmail();
 		String password = client.getPassword();
 		String confirmpassword = client.getConfirmpassword();
 
 		try {
 
-			String insertquerry = "insert into client(ID,clientname,category,location,email,password,confirmpassword) values(?,?,?,?,?,?,?)";
-			result = jdbcTemplate.update(insertquerry, id, name, category, location, email, password, confirmpassword);
+			String insertquerry = "insert into client(ID,clientname,category,email,password,confirmpassword) values(?,?,?,?,?,?)";
+			result = jdbcTemplate.update(insertquerry, id, clientname, category, email, password, confirmpassword);
 			if (result > 0)
 				response.put("message", "Client registered successfully");
 			else
@@ -56,15 +57,15 @@ public class Service {
 		int result = 0;
 		int id = resources.getId();
 		String name = resources.getName();
-		String location = resources.getLocation();
+		String clientname = resources.getClientname();
 		String email = resources.getCorporateemail();
 		String skills = resources.getSkills();
 		String status = resources.getStatus();
 
 		try {
 
-			String insertquerry = "insert into Resources(id,corporateemail,name,status,skills) values(?,?,?,?,?)";
-			result = jdbcTemplate.update(insertquerry, id, email, name, status, skills);
+			String insertquerry = "insert into Resources(id,corporateemail,name,status,skills,clientname) values(?,?,?,?,?,?)";
+			result = jdbcTemplate.update(insertquerry, id, email, name, status, skills, clientname);
 			if (result > 0)
 				response.put("message", "Resources registered successfully");
 			else
@@ -79,18 +80,52 @@ public class Service {
 		return response;
 	}
 
-	public Map<String, Object> getAllClients(Client client) {
+
+//	public Map<String, Object> getClientresources(Client client) {
+//	    logger.info("Entered into getAllClients method of Service");
+//	    Map<String, Object> response = new HashMap<>();
+//	    try {
+//	        if (client.getPassword() != null && !client.getPassword().isEmpty() && !client.getClientname().isEmpty()) {
+//	            String queryString = "SELECT client.clientname, client.email,client.password,Resources.id,Resources.name,Resources.status,Resources.skills FROM client,Resources where client.clientname=? and  Resources.clientname=? and client.email =?";
+//	            List<Map<String, Object>> searchList = jdbcTemplate.queryForList(queryString, client.getClientname(), client.getClientname(), client.getEmail());
+//	            List<Map<String, Object>> dataList = searchList.stream()
+//	                .map(row -> {
+//	                    Map<String, Object> dataMap = new HashMap<>();
+//	                    dataMap.put("clientname", row.get("clientname"));
+//	                    dataMap.put("email", row.get("email"));
+//	                    dataMap.put("password", row.get("password"));
+//	                    dataMap.put("id", row.get("id"));
+//	                    dataMap.put("name", row.get("name"));
+//	                    dataMap.put("status", row.get("status"));
+//	                    dataMap.put("skills", row.get("skills"));
+//	                    return dataMap;
+//	                })
+//	                .collect(Collectors.toList());
+//	            response.put("data", dataList);
+//	        }
+//	    } catch (Exception e) {
+//	        logger.error("Error has occured in getAllClients {}", e.getMessage());
+//	    }
+//	    logger.info("getAllClients method ended");
+//	    return response;
+//	}
+//
+//	
+	
+	
+	public Map<String, Object> getClientresources(Client client) {
 		logger.info("Entered into getAllClients method of Service");
 		String email = client.getEmail();
+		String name = client.getClientname();
 		String pwd = client.getPassword();
 		List<Map<String, Object>> dataList = new ArrayList<>();
 		Map<String, Object> response = new HashMap<>();
 		Map<String, Object> dataMap = null;
 		try {
 
-			if (!client.getPassword().isEmpty() && client.getPassword() != null && !"".equals(client.getEmail())) {
-				String queryString = "SELECT client.clientname, client.email,client.password,Resources.id,Resources.name,Resources.status,Resources.skills FROM client,Resources where client.email=? and  Resources.corporateemail=? ";
-				List<Map<String, Object>> searchList = jdbcTemplate.queryForList(queryString, email, email);
+			if (!client.getPassword().isEmpty() && client.getPassword() != null && !"".equals(client.getClientname())) {
+				String queryString = "SELECT client.clientname, client.email,client.password,Resources.id,Resources.name,Resources.status,Resources.skills FROM client,Resources where client.clientname=? and  Resources.clientname=? and client.email =?";
+				List<Map<String, Object>> searchList = jdbcTemplate.queryForList(queryString, name, name,email);
 
 				for (Map<String, Object> row : searchList) {
 					dataMap = new HashMap<>();
@@ -112,6 +147,9 @@ public class Service {
 		logger.info("getAllClients method ended");
 		return response;
 	}
+	
+	
+	
 
 	public Map<String, Object> updateClient(Client client) {
 		logger.info("Entered into updateClient method of Service");
@@ -194,9 +232,9 @@ public class Service {
 		return response;
 	}
 
-	public List getAllResources() {
+	public List<?> getAllResources() {
 		logger.info("Entered into getAllResources method of Service");
-		List response = null;
+		List<?> response = null;
 		try {
 			String fetchQuery = "select * from resources";
 			response = jdbcTemplate.queryForList(fetchQuery);
